@@ -7,10 +7,24 @@ audioElement.addEventListener("canplay", function() {
   console.log('source =', source);
   source.connect(analyser);
   analyser.connect(context.destination);
-  analyser.fftSize = 256;
-  var bufferLength = analyser.frequencyBinCount;
-  console.log(bufferLength);
-  var dataArray = new Float32Array(bufferLength);
-  console.log(dataArray);
 });
 
+console.log(analyser.fftSize); // 2048 by default
+console.log(analyser.frequencyBinCount); // will give us 1024 data points
+
+analyser.fftSize = 64;
+console.log(analyser.frequencyBinCount); // fftSize/2 = 32 data points
+
+
+
+
+// var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+// analyser.getByteFrequencyData(frequencyData);
+// console.log(frequencyData);
+
+
+window.setInterval(function(){
+    array = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(array); 
+    console.log(array);                                 
+}, 1500)
