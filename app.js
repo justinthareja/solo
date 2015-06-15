@@ -1,30 +1,42 @@
-var context = new window.AudioContext();
+// Create audio context
+var audioCtx = new window.AudioContext();
+// Grab audio element from the DOM 
 var audioElement = document.getElementById("player");
-var analyser = context.createAnalyser();
+// Create an analyzer sound node
+var analyser = audioCtx.createAnalyser();
 
+
+// Wait for audio element to be ready
 audioElement.addEventListener("canplay", function() {
-  var source = context.createMediaElementSource(audioElement);
-  console.log('source =', source);
+  // Define the audio element as the streaming source 
+  var source = audioCtx.createMediaElementSource(audioElement);
+  // Connect the source to the analyzer node in the middle of the audio graph
   source.connect(analyser);
-  analyser.connect(context.destination);
+  // Have the analyzer node connect to the destination
+  analyser.connect(audioCtx.destination);
 });
 
-console.log(analyser.fftSize); // 2048 by default
-console.log(analyser.frequencyBinCount); // will give us 1024 data points
-
+// Size of data set = fftSize / 2  
 analyser.fftSize = 64;
-console.log(analyser.frequencyBinCount); // fftSize/2 = 32 data points
+
+
+// Extract current frequency data from audio element
+var getFrequencyData = function () {
+  var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(frequencyData);
+  // console.log('freq:', frequencyData);
+  return frequencyData;
+};
+
+// Extract current wave data from audio element
+var getWaveFormData = function () {
+  var waveData = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteTimeDomainData(waveData);
+  // console.log('wave:', waveData);
+  return waveData;
+};
 
 
 
-
-// var frequencyData = new Uint8Array(analyser.frequencyBinCount);
-// analyser.getByteFrequencyData(frequencyData);
-// console.log(frequencyData);
-
-
-window.setInterval(function(){
-    array = new Uint8Array(analyser.frequencyBinCount);
-    analyser.getByteFrequencyData(array); 
-    console.log(array);                                 
-}, 1500)
+// window.setInterval(getFrequencyData, 50);
+// window.setInterval(getWaveFormData, 50);
