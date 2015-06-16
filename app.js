@@ -72,23 +72,14 @@ var removeRings = function () {
 };
 
 
-// var isBuilding = false;
 
 var buildRings = function (color, strokeWidth) {
   
-  // if (isBuilding) {
-  //   return;
-  // }
-
-  // isBuilding = true;
-
   var init = [];
   init.push(new Circle (svgOptions.width / 2, svgOptions.height / 2, 2, color));
 
   var circles = container.selectAll(".ring")
     .data(init);
-    // .attr("cx", function (d) { return d.x; })
-    // .attr("cy", function (d) { return d.y; })
     circles.enter().insert("circle", ":first-child")
       .attr("cx", function (d) { return d.x; })
       .attr("cy", function (d) { return d.y; })
@@ -98,29 +89,40 @@ var buildRings = function (color, strokeWidth) {
       .attr("fill", function (d) { return d.color })
       .attr("fill-opacity", 0);
 
-      // .style("fill", function(d) { return d.color; });
     circles.transition()
     .duration(2000)
     .attr("r", 1000)
     .attr("class","complete")
     .attr('stroke', "#6316FF" )
     .attr("stroke-width", 100)
-    // .attr("fill-opacity", 0.25)
     .each("end", function () {
       this.remove();
     });
 
 };
 
-var buildCircles = function (wave, freq) {
+var colors = {
 
-  var colors = [
-    "#63EFFF",
-    "#63BCFF",
-    "#637EFF",
-    "#6316FF"
-  ];
+  cool: {
+    stroke: 'green',
+    theme: [
+      "#63EFFF",
+      "#63BCFF",
+      "#637EFF",
+      "#6316FF"
+    ]
+  }
 
+};
+// var colors = [
+//   "#63EFFF",
+//   "#63BCFF",
+//   "#637EFF",
+//   "#6316FF"
+// ];
+var buildCircles = function (wave, freq, colorScheme) {
+
+console.log(colors[])
 /******* various algorithms to try and understand the data ********/
 
   var bump = 0;
@@ -152,34 +154,28 @@ var buildCircles = function (wave, freq) {
 
   // Random constraints to try and match the heavy bass line
   if (freq[0] > 235 && freq[1] > 220 && wave[0] > 150) {
-    buildRings('green', parseInt(wave[0]/ 20));
-    // console.log('freq=',freq);
-    // console.log('wave=', wave)
+    buildRings(colors[colorScheme].stroke, parseInt(wave[0]/ 20));
   }
 
   var circles = [];
   var xInc = svgOptions.width / analyser.frequencyBinCount;
-  // var yInc = svgOptions.height / analyser.frequencyBinCount;
   var xPos = 0;
   var yPos = svgOptions.height/2;
 
   _.each(freq, function(e, i) {
     var colorIndex = Math.floor(e / 75);
-    // if (wave[0] > 190) {
-    //   // console.log(wave[i]);
-    //   buildRings(colors[colorIndex]);
-    // }
+    var color = colors[colorScheme].theme[colorIndex];
     xPos += xInc;
-    circles.push(new Circle(xPos, yPos, e/4, colors[colorIndex]));
+    circles.push(new Circle(xPos, yPos, e/4, color));
   });
 
   return circles;
 };
 
 
-var animateCircles = function (wave, freq) {
+var animateCircles = function (wave, freq, colorScheme) {
   // Build new circles with new data set
-  var jsonCircles = buildCircles(wave, freq);
+  var jsonCircles = buildCircles(wave, freq, colorScheme);
 
   // Update
   var circles = container.selectAll(".meter-circle")
@@ -201,40 +197,10 @@ var animateCircles = function (wave, freq) {
   circles.exit().remove();
 };
 
-
-
-var animateAll = function () {
-  animateCircles(getWaveFormData(), getFrequencyData());
-  // hollowCircle(updatedData);
-  // animateBackgroundColor(updatedData);
-};
-
-var render = function () {
+var render = function (colorScheme) {
   requestAnimationFrame(render);
-  animateAll();
+  animateCircles(getWaveFormData(), getFrequencyData(), colorScheme);
 };
-
-
-// setInterval(removeRings, 3000);
-// var animateBackgroundColor = function (freqData) {
-
-//   var colors = [
-//     "#21E5FF",
-//     "#21D1FF",
-//     "#21C1FF",
-//     "#21CCFF",
-//     "#21CAFF",
-//     "#21BAFF",
-//     "#21AAFF",
-//     "#21D1FF",
-//     "#21A1FF",
-//     "#2191FF"
-//   ];
-
-//   var index = Math.floor(Math.random()*colors.length);
-//   container.style("background-color", colors[index]).transition(1500);
-
-// };
 
 play();
-render();
+render("cool");
