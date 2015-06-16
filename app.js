@@ -2,6 +2,7 @@ var audioCtx = new window.AudioContext(); // Create audio context
 var audioElement = document.getElementById("player"); // Grab audio element from the DOM 
 var analyser = audioCtx.createAnalyser(); // Create an analyzer sound node
 analyser.fftSize = 32; // Size of data set = fftSize / 2
+analyser.maxDecibels = -15;
 
 // Wait for audio element to be ready
 audioElement.addEventListener("canplay", function() {
@@ -35,8 +36,8 @@ var pause = function () {
 };
 
 var svgOptions = {
-  width: 1000,
-  height: 500
+  width: 1600,
+  height: 800
 };
 
 var container = d3.select("body")
@@ -66,14 +67,14 @@ var randY = function () { return Math.floor(Math.random() * svgOptions.height); 
 
 
 var removeRings = function () {
-  console.log('removed')
+  console.log('removed');
   d3.selectAll(".complete").remove();
 };
 
 
 // var isBuilding = false;
 
-var buildRings = function (color) {
+var buildRings = function (color, strokeWidth) {
   
   // if (isBuilding) {
   //   return;
@@ -88,19 +89,23 @@ var buildRings = function (color) {
     .data(init);
     // .attr("cx", function (d) { return d.x; })
     // .attr("cy", function (d) { return d.y; })
-    circles.enter().append("circle")
+    circles.enter().insert("circle", ":first-child")
       .attr("cx", function (d) { return d.x; })
       .attr("cy", function (d) { return d.y; })
       .attr("r", function (d) { return d.r; })
       .attr("stroke", function (d) { return d.color; })
-      .attr("stroke-width", 5)
+      .attr("stroke-width", strokeWidth)
+      .attr("fill", function (d) { return d.color })
       .attr("fill-opacity", 0);
 
       // .style("fill", function(d) { return d.color; });
     circles.transition()
-    .duration(1500)
-    .attr("r", 750)
+    .duration(2000)
+    .attr("r", 1000)
     .attr("class","complete")
+    .attr('stroke', "#6316FF" )
+    .attr("stroke-width", 100)
+    // .attr("fill-opacity", 0.25)
     .each("end", function () {
       this.remove();
     });
@@ -116,8 +121,40 @@ var buildCircles = function (wave, freq) {
     "#6316FF"
   ];
 
-  if (freq[0] >= 255 && freq[1] >= 255 && wave[0] > 170) {
-    buildRings('black');
+/******* various algorithms to try and understand the data ********/
+
+  var bump = 0;
+  var treble = 0;
+
+  for (var i = 0; i < 7; i++) {
+    bump += freq[i];
+    bump /= 2;
+  }
+
+  var reduced = _.reduce(wave, function (a, b) {
+    return (a + b) / 2;
+  });
+
+  // if (bump > 180) {
+  //   console.log(bump);
+  // }
+
+  // if (reduced > 180) {
+  //   console.log('BUMP')
+  //   console.log(reduced);
+  //   buildRings('green', parseInt(wave[0]/ 20));
+  // }
+
+  // if (treble > 150) {
+  //   console.log(treble);
+    
+  // }
+
+  // Random constraints to try and match the heavy bass line
+  if (freq[0] > 235 && freq[1] > 220 && wave[0] > 150) {
+    buildRings('green', parseInt(wave[0]/ 20));
+    // console.log('freq=',freq);
+    // console.log('wave=', wave)
   }
 
   var circles = [];
@@ -127,13 +164,13 @@ var buildCircles = function (wave, freq) {
   var yPos = svgOptions.height/2;
 
   _.each(freq, function(e, i) {
-    var colorIndex = Math.floor(e / 85);
+    var colorIndex = Math.floor(e / 75);
     // if (wave[0] > 190) {
     //   // console.log(wave[i]);
     //   buildRings(colors[colorIndex]);
     // }
     xPos += xInc;
-    circles.push(new Circle(xPos, yPos, e/5, colors[colorIndex]));
+    circles.push(new Circle(xPos, yPos, e/4, colors[colorIndex]));
   });
 
   return circles;
@@ -199,5 +236,5 @@ var render = function () {
 
 // };
 
-// play();
-// render();
+play();
+render();
