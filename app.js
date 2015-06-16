@@ -60,8 +60,8 @@ var themes = {
     colors: [
       "#FFA59E",
       "#DFDFE8",
-      "3BFF77",
-      "E8C343"
+      "#3BFF77",
+      "#E8C343"
     ]
   }
 };
@@ -270,17 +270,16 @@ var addClickListeners = function (collection) {
 };
 
 var app = {
-
+  init: function () {
+    // Append defined themes
+    appendThemes();
+    // Play the audio on load
+    play();
+    // Default theme
+    updateTheme("warm");
+  }
 };
 
-app.init = function () {
-  // Append defined themes
-  appendThemes();
-  // Play the audio on load
-  play();
-  // Default theme
-  updateTheme("warm");
-};
 
-
+// Kick it off!
 app.init();
