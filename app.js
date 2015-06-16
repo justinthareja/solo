@@ -93,7 +93,7 @@ var canvas = d3.select("body")
   .append("svg")
   .attr("width", svgOptions.width)
   .attr("height", svgOptions.height)
-  .attr("class", "svg-canvas");
+  .attr("id", "svg-canvas");
 
 // Helper functions to format data for d3
 var buildThemeButtons = function (themes) {
@@ -160,6 +160,8 @@ var buildRings = function (colorTheme, strokeWidth) {
     });
 
 };
+
+
 
 var buildCircles = function (wave, freq, colorTheme) {
   
@@ -262,8 +264,8 @@ var updateTheme = function (colorTheme) {
 var addClickListeners = function (collection) {
   _.each(collection, function (theme, i) {
     var el = document.getElementById(i);
-    el.addEventListener('click', function () {
-      console.log('click');
+    el.addEventListener("click", function () {
+      console.log("click");
       updateTheme(this.id);
     });
   });
@@ -280,6 +282,40 @@ var app = {
   }
 };
 
+var buildBubbles = function () {
+  
+}
+
+var el = document.getElementById("svg-canvas");
+el.addEventListener("mousemove", function (event) {
+  
+  var x = event.screenX;
+  var y = event.screenY;
+  var r = Math.random() * 100
+  var colorIndex = Math.floor(Math.random() * 4);
+  var opacity = Math.random() * 0.5;
+
+  var init = [];
+  init.push(new Circle (x, y, r, themes["cool"].colors[colorIndex]));
+
+  var bubbles = canvas.selectAll(".bubble")
+    .data(init);
+    bubbles.enter().insert("circle", ":first-child")
+      .attr("cx", function (d) { return d.x; })
+      .attr("cy", function (d) { return d.y; })
+      .attr("r", function (d) { return d.r; })
+      .attr("fill", function (d) { return d.color; })
+      .attr("fill-opacity", opacity);
+
+    bubbles.transition()
+    .duration(5000)
+    .attr("r", 0)
+    .attr("fill-opacity", 0)
+    .each("end", function () {
+      this.remove();
+    });
+
+});
 
 // Kick it off!
 app.init();
