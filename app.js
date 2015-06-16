@@ -40,6 +40,26 @@ var svgOptions = {
   height: 800
 };
 
+var themes = {
+  cool: {
+    stroke: "green",
+    theme: [
+      "#63EFFF",
+      "#63BCFF",
+      "#637EFF",
+      "#6316FF"
+    ]
+  },
+  warm: {
+    stroke: "#FF008E",
+    theme: [
+      "#E8DD0D",
+      "#E8A40D",
+      "#E85A0D",
+      "#E81517"
+    ]
+  }
+};
 var container = d3.select("body")
   .append("svg")
   .attr("width", svgOptions.width)
@@ -73,10 +93,10 @@ var removeRings = function () {
 
 
 
-var buildRings = function (colorScheme, strokeWidth) {
+var buildRings = function (colorTheme, strokeWidth) {
   
   var init = [];
-  init.push(new Circle (svgOptions.width / 2, svgOptions.height / 2, 2, colors[colorScheme].stroke));
+  init.push(new Circle (svgOptions.width / 2, svgOptions.height / 2, 2, themes[colorTheme].stroke));
 
   var circles = container.selectAll(".ring")
     .data(init);
@@ -93,45 +113,25 @@ var buildRings = function (colorScheme, strokeWidth) {
     .duration(2000)
     .attr("r", 1000)
     .attr("class","complete")
-    .attr("stroke", colors[colorScheme].theme[0])
-    .attr("stroke-width", 100)
+    .attr("stroke", themes[colorTheme].theme[0])
+    .attr("stroke-width", strokeWidth * 10)
     .each("end", function () {
       this.remove();
     });
 
 };
 
-var colors = {
-  cool: {
-    stroke: "green",
-    theme: [
-      "#63EFFF",
-      "#63BCFF",
-      "#637EFF",
-      "#6316FF"
-    ]
-  },
-  warm: {
-    stroke: "#FF008E",
-    theme: [
-      "#E8DD0D",
-      "#E8A40D",
-      "#E85A0D",
-      "#E81517"
-    ]
-  }
-};
 
 
-// var colors = [
+// var themes = [
 //   "#63EFFF",
 //   "#63BCFF",
 //   "#637EFF",
 //   "#6316FF"
 // ];
-var buildCircles = function (wave, freq, colorScheme) {
+var buildCircles = function (wave, freq, colorTheme) {
 
-// console.log(colors[colorScheme]);
+// console.log(themes[colorTheme]);
 /******* various algorithms to try and understand the data ********/
   
   var bump = 0;
@@ -163,7 +163,7 @@ var buildCircles = function (wave, freq, colorScheme) {
 
   // Random constraints to try and match the heavy bass line
   if (freq[0] > 235 && freq[1] > 220 && wave[0] > 150) {
-    buildRings(colorScheme, parseInt(wave[0]/20));
+    buildRings(colorTheme, parseInt(wave[0]/20));
   }
 
   var circles = [];
@@ -173,7 +173,7 @@ var buildCircles = function (wave, freq, colorScheme) {
 
   _.each(freq, function(e, i) {
     var colorIndex = Math.floor(e / 75);
-    var color = colors[colorScheme].theme[colorIndex];
+    var color = themes[colorTheme].theme[colorIndex];
     xPos += xInc;
     circles.push(new Circle(xPos, yPos, e/4, color));
   });
@@ -182,9 +182,9 @@ var buildCircles = function (wave, freq, colorScheme) {
 };
 
 
-var animateCircles = function (wave, freq, colorScheme) {
+var animateCircles = function (wave, freq, colorTheme) {
   // Build new circles with new data set
-  var jsonCircles = buildCircles(wave, freq, colorScheme);
+  var jsonCircles = buildCircles(wave, freq, colorTheme);
 
   // Update
   var circles = container.selectAll(".meter-circle")
@@ -208,16 +208,16 @@ var animateCircles = function (wave, freq, colorScheme) {
 
 var requestID;
 
-var render = function (colorScheme) {
-  animateCircles(getWaveFormData(), getFrequencyData(), colorScheme);
+var render = function (colorTheme) {
+  animateCircles(getWaveFormData(), getFrequencyData(), colorTheme);
   requestID = requestAnimationFrame(function () {
-    return render(colorScheme);
+    return render(colorTheme);
   });
 };
 
-var start = function (colorScheme) {
+var start = function (colorTheme) {
   if (!requestID) {
-    render(colorScheme);
+    render(colorTheme);
   }
 };
 
@@ -228,9 +228,9 @@ var stop = function () {
   }
 };
 
-var updateTheme = function (colorScheme) {
+var updateTheme = function (colorTheme) {
   stop();
-  start(colorScheme);
+  start(colorTheme);
 };
 
 play();
