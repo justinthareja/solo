@@ -35,10 +35,6 @@ var pause = function () {
   audioElement.pause();
 };
 
-var svgOptions = {
-  width: 1400,
-  height: 800
-};
 
 var themes = {
   cool: {
@@ -58,10 +54,19 @@ var themes = {
       "#E85A0D",
       "#E81517"
     ]
+  },
+  watermelon: {
+    stroke: "FF4864",
+    colors: [
+      "#FFA59E",
+      "#DFDFE8",
+      "3BFF77",
+      "E8C343"
+    ]
   }
 };
 
-
+// Button class used to represent theme buttons
 var Button = function (x, y, h, w, id) {
   this.x = x;
   this.y = y;
@@ -69,46 +74,6 @@ var Button = function (x, y, h, w, id) {
   this.width = w;
   this.id = id;
 };
-
-var buildThemeButtons = function (themes) {
-
-  var buttons = [];
-  var padding = 10;
-  var xPos = 0, yPos = 0;
-  var height = 30, width = 80;
-  var xStep = width + padding;
-
-
-  _.each(themes, function (theme, key) {
-    buttons.push(new Button (xPos, yPos, height, width, key));
-    xPos += xStep;
-  });
-
-  return buttons;
-
-};
-
-
-
-
-var container = d3.select("body")
-  .append("svg")
-  .attr("width", svgOptions.width)
-  .attr("height", svgOptions.height)
-  .attr("class", "svg-container");
-
-container.selectAll(".button")
-  .data(buildThemeButtons(themes))
-  .enter()
-  .append("rect")
-  .attr("height", function(d) { return d.height; })
-  .attr("width", function(d) { return d.width; })
-  .attr("y", function(d) { return d.y; })
-  .attr("x", function(d) { return d.x; })
-  .attr("id", function(d) { return d.id; })
-  .attr("class", "button")
-  .attr("fill", function(d) { return themes[d.id].colors[1]; });
-
 
 // Circle class to define cx cy radius and color attribute
 var Circle = function (x, y, r, color) {
@@ -118,16 +83,54 @@ var Circle = function (x, y, r, color) {
   this.color = color;
 };
 
+var svgOptions = {
+  width: 1400,
+  height: 800
+};
+
+// Append SVG visualization canvas to body based on svgOptions
+var canvas = d3.select("body")
+  .append("svg")
+  .attr("width", svgOptions.width)
+  .attr("height", svgOptions.height)
+  .attr("class", "svg-canvas");
+
+// Helper functions to format data for d3
+var buildThemeButtons = function (themes) {
+  var buttons = [];
+  var padding = 10;
+  var xPos = 0, yPos = 0;
+  var height = 30, width = 80;
+  var xStep = width + padding;
+
+  _.each(themes, function (theme, key) {
+    buttons.push(new Button (xPos, yPos, height, width, key));
+    xPos += xStep;
+  });
+
+  return buttons;
+};
+
+// Append theme buttons to canvas
+var appendThemes = function () {
+  canvas.selectAll(".button")
+    .data(buildThemeButtons(themes))
+    .enter()
+    .append("rect")
+    .attr("height", function(d) { return d.height; })
+    .attr("width", function(d) { return d.width; })
+    .attr("y", function(d) { return d.y; })
+    .attr("x", function(d) { return d.x; })
+    .attr("id", function(d) { return d.id; })
+    .attr("class", "button")
+    .attr("fill", function(d) { return themes[d.id].colors[1]; });
+
+  addClickListeners(themes);
+};
+
 // Generate a random X or Y coordinate based on svgOptions
 var randX = function () { return Math.floor(Math.random() * svgOptions.width); };
 var randY = function () { return Math.floor(Math.random() * svgOptions.height); };
-
-
-var removeRings = function () {
-  console.log("all rings removed");
-  d3.selectAll(".complete").remove();
-};
-
 
 
 var buildRings = function (colorTheme, strokeWidth) {
@@ -135,7 +138,7 @@ var buildRings = function (colorTheme, strokeWidth) {
   var init = [];
   init.push(new Circle (svgOptions.width / 2, svgOptions.height / 2, 2, themes[colorTheme].stroke));
 
-  var circles = container.selectAll(".ring")
+  var circles = canvas.selectAll(".ring")
     .data(init);
     circles.enter().insert("circle", ":first-child")
       .attr("cx", function (d) { return d.x; })
@@ -158,25 +161,13 @@ var buildRings = function (colorTheme, strokeWidth) {
 
 };
 
-// var themes = [
-//   "#63EFFF",
-//   "#63BCFF",
-//   "#637EFF",
-//   "#6316FF"
-// ];
 var buildCircles = function (wave, freq, colorTheme) {
-
-// console.log(themes[colorTheme]);
-/******* various algorithms to try and understand the data ********/
   
   var bump = 0;
-  var treble = 0;
-
   for (var i = 0; i < 7; i++) {
     bump += freq[i];
     bump /= 2;
   }
-
   var reduced = _.reduce(wave, function (a, b) {
     return (a + b) / 2;
   });
@@ -222,7 +213,7 @@ var animateCircles = function (wave, freq, colorTheme) {
   var jsonCircles = buildCircles(wave, freq, colorTheme);
 
   // Update
-  var circles = container.selectAll(".meter-circle")
+  var circles = canvas.selectAll(".meter-circle")
     .data(jsonCircles)
     .attr("cx", function (d) { return d.x; })
     .attr("cy", function (d) { return d.y; })
@@ -268,5 +259,28 @@ var updateTheme = function (colorTheme) {
   start(colorTheme);
 };
 
-play();
-updateTheme("warm");
+var addClickListeners = function (collection) {
+  _.each(collection, function (theme, i) {
+    var el = document.getElementById(i);
+    el.addEventListener('click', function () {
+      console.log('click');
+      updateTheme(this.id);
+    });
+  });
+};
+
+var app = {
+
+};
+
+app.init = function () {
+  // Append defined themes
+  appendThemes();
+  // Play the audio on load
+  play();
+  // Default theme
+  updateTheme("warm");
+};
+
+
+app.init();

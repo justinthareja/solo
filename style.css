@@ -1,7 +1,7 @@
-.ring {
-  stroke: "black";
-  fill-opacity: 0;
-}
-.svg-container {
+.svg-canvas {
   background-color: rgb(51, 53, 55);
+}
+
+.svg-canvas-cool {
+  background-color: blanchedalmond;
 }
