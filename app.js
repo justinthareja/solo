@@ -35,14 +35,15 @@ var pause = function () {
 };
 
 var svgOptions = {
-  width: 500,
+  width: 1000,
   height: 500
 };
 
 var svgContainer = d3.select("body")
-                     .append("svg")
-                     .attr("width", svgOptions.width)
-                     .attr("height", svgOptions.height);
+   .append("svg")
+   .attr("width", svgOptions.width)
+   .attr("height", svgOptions.height)
+   .attr("class", "svg-container");
 
 
 // Circle class to define cx cy radius and color attribute
@@ -53,39 +54,46 @@ var Circle = function (x, y, r, color) {
   this.color = color;
 };
 
-// var randX = function () { return Math.floor(Math.random() * svgOptions.width); };
-// var randY = function () { return Math.floor(Math.random() * svgOptions.height); };
+// Generate a random X or Y coordinate based on svgOptions
+var randX = function () { return Math.floor(Math.random() * svgOptions.width); };
+var randY = function () { return Math.floor(Math.random() * svgOptions.height); };
 
 var buildCircles = function (data) {
+  var colors = [
+    '#63EFFF',
+    '#63BCFF',
+    '#637EFF',
+    '#6316FF'
+  ];
+
   var circles = [];
   var xInc = svgOptions.width / analyser.frequencyBinCount;
   // var yInc = svgOptions.height / analyser.frequencyBinCount;
   var xPos = 0;
-  var yPos = svgOptions.width/2;
+  var yPos = svgOptions.height/2;
 
   _.each(data, function(e, i) {
+    var colorIndex = Math.floor(e / 85);
+    console.log(colorIndex);
     xPos += xInc;
-    circles.push(new Circle(xPos, yPos, e/10, 'red'));
+    circles.push(new Circle(xPos, yPos, e/10, colors[colorIndex]));
   });
 
   return circles;
 };
 
 
-var render = function (data) {
-
-  requestAnimationFrame(render);
-  
+var animateCircles = function (freqData) {
   // Build new circles with new data set
-  var jsonCircles = buildCircles(getFrequencyData());
+  var jsonCircles = buildCircles(freqData);
 
   // Update
   var circles = svgContainer.selectAll("circle")
-  .data(jsonCircles)
-  .attr("cx", function (d) { return d.x; })
-  .attr("cy", function (d) { return d.y; })
-  .attr("r", function (d) { return d.r; })
-  .style("fill", function(d) { return d.color; });
+    .data(jsonCircles)
+    .attr("cx", function (d) { return d.x; })
+    .attr("cy", function (d) { return d.y; })
+    .attr("r", function (d) { return d.r; })
+    .style("fill", function(d) { return d.color; });
 
   // Enter
   circles.enter().append("circle")
@@ -96,7 +104,46 @@ var render = function (data) {
 
   // Exit
   circles.exit().remove();
+};
+
+var animateBackgroundColor = function (freqData) {
+
+  
+
+  var colors = [
+    '#21E5FF',
+    '#21D1FF',
+    '#21C1FF',
+    '#21CCFF',
+    '#21CAFF',
+    '#21BAFF',
+    '#21AAFF',
+    '#21D1FF',
+    '#21A1FF',
+    '#2191FF'
+  ];
+
+  var index = Math.floor(Math.random()*colors.length);
+  svgContainer.style('background-color', colors[index]).transition(1500);
 
 };
 
 
+
+
+
+
+var animateAll = function () {
+  var updatedData = getFrequencyData();
+  animateCircles(updatedData);
+  // animateBackgroundColor(updatedData);
+};
+
+var render = function () {
+  requestAnimationFrame(render);
+  animateAll();
+};
+
+
+// play();
+// render();
