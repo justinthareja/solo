@@ -2,7 +2,7 @@ var audioCtx = new window.AudioContext(); // Create audio context
 var audioElement = document.getElementById("player"); // Grab audio element from the DOM 
 var analyser = audioCtx.createAnalyser(); // Create an analyzer sound node
 analyser.fftSize = 32; // Size of data set = fftSize / 2
-analyser.maxDecibels = -15;
+analyser.maxDecibels = -15; // Expand the variance of frequency data by increasing maxDecibels (default: -30)
 
 // Wait for audio element to be ready
 audioElement.addEventListener("canplay", function() {
@@ -36,7 +36,7 @@ var pause = function () {
 };
 
 var svgOptions = {
-  width: 1600,
+  width: 1400,
   height: 800
 };
 
@@ -67,16 +67,16 @@ var randY = function () { return Math.floor(Math.random() * svgOptions.height); 
 
 
 var removeRings = function () {
-  console.log('removed');
+  console.log("all rings removed");
   d3.selectAll(".complete").remove();
 };
 
 
 
-var buildRings = function (color, strokeWidth) {
+var buildRings = function (colorScheme, strokeWidth) {
   
   var init = [];
-  init.push(new Circle (svgOptions.width / 2, svgOptions.height / 2, 2, color));
+  init.push(new Circle (svgOptions.width / 2, svgOptions.height / 2, 2, colors[colorScheme].stroke));
 
   var circles = container.selectAll(".ring")
     .data(init);
@@ -86,14 +86,14 @@ var buildRings = function (color, strokeWidth) {
       .attr("r", function (d) { return d.r; })
       .attr("stroke", function (d) { return d.color; })
       .attr("stroke-width", strokeWidth)
-      .attr("fill", function (d) { return d.color })
+      .attr("fill", function (d) { return d.color; })
       .attr("fill-opacity", 0);
 
     circles.transition()
     .duration(2000)
     .attr("r", 1000)
     .attr("class","complete")
-    .attr('stroke', "#6316FF" )
+    .attr("stroke", colors[colorScheme].theme[0])
     .attr("stroke-width", 100)
     .each("end", function () {
       this.remove();
@@ -102,18 +102,27 @@ var buildRings = function (color, strokeWidth) {
 };
 
 var colors = {
-
   cool: {
-    stroke: 'green',
+    stroke: "green",
     theme: [
       "#63EFFF",
       "#63BCFF",
       "#637EFF",
       "#6316FF"
     ]
+  },
+  warm: {
+    stroke: "#FF008E",
+    theme: [
+      "#E8DD0D",
+      "#E8A40D",
+      "#E85A0D",
+      "#E81517"
+    ]
   }
-
 };
+
+
 // var colors = [
 //   "#63EFFF",
 //   "#63BCFF",
@@ -122,9 +131,9 @@ var colors = {
 // ];
 var buildCircles = function (wave, freq, colorScheme) {
 
-console.log(colors[])
+// console.log(colors[colorScheme]);
 /******* various algorithms to try and understand the data ********/
-
+  
   var bump = 0;
   var treble = 0;
 
@@ -142,9 +151,9 @@ console.log(colors[])
   // }
 
   // if (reduced > 180) {
-  //   console.log('BUMP')
+  //   console.log("BUMP")
   //   console.log(reduced);
-  //   buildRings('green', parseInt(wave[0]/ 20));
+  //   buildRings("green", parseInt(wave[0]/ 20));
   // }
 
   // if (treble > 150) {
@@ -154,7 +163,7 @@ console.log(colors[])
 
   // Random constraints to try and match the heavy bass line
   if (freq[0] > 235 && freq[1] > 220 && wave[0] > 150) {
-    buildRings(colors[colorScheme].stroke, parseInt(wave[0]/ 20));
+    buildRings(colorScheme, parseInt(wave[0]/20));
   }
 
   var circles = [];
@@ -197,10 +206,32 @@ var animateCircles = function (wave, freq, colorScheme) {
   circles.exit().remove();
 };
 
+var requestID;
+
 var render = function (colorScheme) {
-  requestAnimationFrame(render);
   animateCircles(getWaveFormData(), getFrequencyData(), colorScheme);
+  requestID = requestAnimationFrame(function () {
+    return render(colorScheme);
+  });
+};
+
+var start = function (colorScheme) {
+  if (!requestID) {
+    render(colorScheme);
+  }
+};
+
+var stop = function () {
+  if (requestID) {
+    window.cancelAnimationFrame(requestID);
+    requestID = undefined;
+  }
+};
+
+var updateTheme = function (colorScheme) {
+  stop();
+  start(colorScheme);
 };
 
 play();
-render("cool");
+updateTheme("warm");
