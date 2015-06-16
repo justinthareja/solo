@@ -43,7 +43,7 @@ var svgOptions = {
 var themes = {
   cool: {
     stroke: "green",
-    theme: [
+    colors: [
       "#63EFFF",
       "#63BCFF",
       "#637EFF",
@@ -52,7 +52,7 @@ var themes = {
   },
   warm: {
     stroke: "#FF008E",
-    theme: [
+    colors: [
       "#E8DD0D",
       "#E8A40D",
       "#E85A0D",
@@ -60,17 +60,54 @@ var themes = {
     ]
   }
 };
+
+
+var Button = function (x, y, h, w, id) {
+  this.x = x;
+  this.y = y;
+  this.height = h;
+  this.width = w;
+  this.id = id;
+};
+
+var buildThemeButtons = function (themes) {
+
+  var buttons = [];
+  var padding = 10;
+  var xPos = 0, yPos = 0;
+  var height = 30, width = 80;
+  var xStep = width + padding;
+
+
+  _.each(themes, function (theme, key) {
+    buttons.push(new Button (xPos, yPos, height, width, key));
+    xPos += xStep;
+  });
+
+  return buttons;
+
+};
+
+
+
+
 var container = d3.select("body")
   .append("svg")
   .attr("width", svgOptions.width)
   .attr("height", svgOptions.height)
   .attr("class", "svg-container");
 
-var rings = d3.select("body")
-  .append("div")
-  .attr("width", svgOptions.width)
-  .attr("height", svgOptions.height)
-  .attr("class", "svg-container");
+container.selectAll(".button")
+  .data(buildThemeButtons(themes))
+  .enter()
+  .append("rect")
+  .attr("height", function(d) { return d.height; })
+  .attr("width", function(d) { return d.width; })
+  .attr("y", function(d) { return d.y; })
+  .attr("x", function(d) { return d.x; })
+  .attr("id", function(d) { return d.id; })
+  .attr("class", "button")
+  .attr("fill", function(d) { return themes[d.id].colors[1]; });
 
 
 // Circle class to define cx cy radius and color attribute
@@ -113,15 +150,13 @@ var buildRings = function (colorTheme, strokeWidth) {
     .duration(2000)
     .attr("r", 1000)
     .attr("class","complete")
-    .attr("stroke", themes[colorTheme].theme[0])
+    .attr("stroke", themes[colorTheme].colors[0])
     .attr("stroke-width", strokeWidth * 10)
     .each("end", function () {
       this.remove();
     });
 
 };
-
-
 
 // var themes = [
 //   "#63EFFF",
@@ -173,7 +208,7 @@ var buildCircles = function (wave, freq, colorTheme) {
 
   _.each(freq, function(e, i) {
     var colorIndex = Math.floor(e / 75);
-    var color = themes[colorTheme].theme[colorIndex];
+    var color = themes[colorTheme].colors[colorIndex];
     xPos += xInc;
     circles.push(new Circle(xPos, yPos, e/4, color));
   });
