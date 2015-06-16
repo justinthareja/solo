@@ -1,3 +1,7 @@
+.ring {
+  stroke: "black";
+  fill-opacity: 0;
+}
 .svg-container {
   background-color: white;
 }
