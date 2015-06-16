@@ -45,6 +45,7 @@ var svgContainer = d3.select("body")
                      .attr("height", svgOptions.height);
 
 
+// Circle class to define cx cy radius and color attribute
 var Circle = function (x, y, r, color) {
   this.x = x;
   this.y = y;
@@ -52,48 +53,50 @@ var Circle = function (x, y, r, color) {
   this.color = color;
 };
 
-var randX = function () {
-  return Math.floor(Math.random() * svgOptions.width);
-};
-  
-var randY = function () {
-  return Math.floor(Math.random() * svgOptions.width);
-};
+// var randX = function () { return Math.floor(Math.random() * svgOptions.width); };
+// var randY = function () { return Math.floor(Math.random() * svgOptions.height); };
 
 var buildCircles = function (data) {
-
   var circles = [];
+  var xInc = svgOptions.width / analyser.frequencyBinCount;
+  // var yInc = svgOptions.height / analyser.frequencyBinCount;
+  var xPos = 0;
+  var yPos = svgOptions.width/2;
 
-  data.forEach(function(element, index, collection) {
-    circles.push(new Circle(randX(), randY(), element/10, 'red'));
+  _.each(data, function(e, i) {
+    xPos += xInc;
+    circles.push(new Circle(xPos, yPos, e/10, 'red'));
   });
 
   return circles;
 };
 
-var sampleData = [255, 120, 35, 200, 135, 45];
-var jsonCircles = buildCircles(sampleData);
 
-// var jsonCircles = [
-//   { "x_axis": 30, "y_axis": 30, "radius": 20, "color" : "green" },
-//   { "x_axis": 70, "y_axis": 70, "radius": 20, "color" : "purple"},
-//   { "x_axis": 110, "y_axis": 100, "radius": 20, "color" : "red"}];
+var render = function (data) {
 
+  requestAnimationFrame(render);
+  
+  // Build new circles with new data set
+  var jsonCircles = buildCircles(getFrequencyData());
 
-var circles = svgContainer.selectAll("circle")
-                          .data(jsonCircles)
-                          .enter()
-                          .append("circle");
+  // Update
+  var circles = svgContainer.selectAll("circle")
+  .data(jsonCircles)
+  .attr("cx", function (d) { return d.x; })
+  .attr("cy", function (d) { return d.y; })
+  .attr("r", function (d) { return d.r; })
+  .style("fill", function(d) { return d.color; });
 
-var circleAttributes = circles
-                     .attr("cx", function (d) { return d.x; })
-                     .attr("cy", function (d) { return d.y; })
-                     .attr("r", function (d) { return d.r; })
-                     .style("fill", function(d) { return d.color; });
+  // Enter
+  circles.enter().append("circle")
+     .attr("cx", function (d) { return d.x; })
+     .attr("cy", function (d) { return d.y; })
+     .attr("r", function (d) { return d.r; })
+     .style("fill", function(d) { return d.color; });
 
+  // Exit
+  circles.exit().remove();
 
-
-
-
+};
 
 
