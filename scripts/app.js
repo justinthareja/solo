@@ -1,30 +1,3 @@
-var app; 
-
-(function() {
-
-  app = {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  };
-})();
 var audioCtx = new window.AudioContext(); // Create audio context
 var audioElement = document.getElementById("player"); // Grab audio element from the DOM 
 var analyser = audioCtx.createAnalyser(); // Create an analyzer sound node
