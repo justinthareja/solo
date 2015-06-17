@@ -97,11 +97,21 @@ var canvas = d3.select("body")
   .attr("height", svgOptions.height)
   .attr("id", "svg-canvas");
 
+canvas.append("svg")
+  .attr("width", 50)
+  .attr("height", 50)
+  .attr("id", "icon")
+  .attr("viewBox", "0 0 5 5")
+  .attr("xmlns","http://www.w3.org/2000/svg")
+  .append("path")
+    .attr("d", "M2 1 h1 v1 h1 v1 h-1 v1 h-1 v-1 h-1 v-1 h1 z")
+
+
 // Helper functions to format data for d3
 var buildThemeButtons = function (themes) {
   var buttons = [];
   var padding = 10;
-  var xPos = 0, yPos = 0;
+  var xPos = 50, yPos = 10;
   var height = 30, width = 80;
   var xStep = width + padding;
 
@@ -162,31 +172,6 @@ var buildRings = function (colorTheme, strokeWidth) {
     });
 
 };
-
-// random calculations trying to find bass line
-// var bump = 0;
-// for (var i = 0; i < 7; i++) {
-//   bump += freq[i];
-//   bump /= 2;
-// }
-// var reduced = _.reduce(wave, function (a, b) {
-//   return (a + b) / 2;
-// });
-
-// if (bump > 180) {
-//   console.log(bump);
-// }
-
-// if (reduced > 180) {
-//   console.log("BUMP")
-//   console.log(reduced);
-//   buildRings("green", parseInt(wave[0]/ 20));
-// }
-
-// if (treble > 150) {
-//   console.log(treble);
-  
-// }
 
 var buildCircles = function (wave, freq, colorTheme) {
   
@@ -313,12 +298,11 @@ document.getElementById("svg-canvas").addEventListener("mousemove", function (ev
   buildBubbles(bubble);
 });
 
-document.getElementById("svg-canvas").addEventListener("click", function (event) {
+document.getElementById("icon").addEventListener("click", function (event) {
   pause();
   var themeName = window.prompt("enter a new theme name");
   var themeColors = window.prompt("enter 5 colors for " + themeName + " separated by commas:");
   var themeCompliment = window.prompt("enter complementary theme. you can pick from");
-
 
   themes[themeName] = {
     compliment: themeCompliment,
@@ -327,6 +311,7 @@ document.getElementById("svg-canvas").addEventListener("click", function (event)
 
   // console.log(themes)
   appendThemes();
+  updateTheme(themeName);
   play();
 
 

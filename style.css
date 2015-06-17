@@ -1,3 +1,10 @@
+#icon > path {
+  fill: gold;
+  stroke: gold;
+  stroke-width: 0.1;
+  stroke-linejoin: round;
+}
+
 #svg-canvas {
   background-color: rgb(51, 53, 55);
 }
