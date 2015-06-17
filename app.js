@@ -302,7 +302,7 @@ document.getElementById("icon").addEventListener("click", function (event) {
   pause();
   var themeName = window.prompt("enter a new theme name");
   var themeColors = window.prompt("enter 5 colors for " + themeName + " separated by commas:");
-  var themeCompliment = window.prompt("enter complementary theme. you can pick from");
+  var themeCompliment = window.prompt("enter complementary theme");
 
   themes[themeName] = {
     compliment: themeCompliment,
@@ -314,8 +314,7 @@ document.getElementById("icon").addEventListener("click", function (event) {
   updateTheme(themeName);
   play();
 
-
-})
+});
 
 var app = {
   init: function () {
@@ -329,3 +328,5 @@ var app = {
 };
 // Kick it off!
 app.init();
+
+// #E16AFF, #E86FA1, #FF8F7A, #E8A46F, #FFDF9D
