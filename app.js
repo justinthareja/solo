@@ -35,10 +35,11 @@ var pause = function () {
   audioElement.pause();
 };
 
-
+var currentTheme = undefined;
 var themes = {
   cool: {
     stroke: "green",
+    compliment: "warm",
     colors: [
       "#63EFFF",
       "#63BCFF",
@@ -48,6 +49,7 @@ var themes = {
   },
   warm: {
     stroke: "#FF008E",
+    compliment: "cool",
     colors: [
       "#E8DD0D",
       "#E8A40D",
@@ -161,39 +163,33 @@ var buildRings = function (colorTheme, strokeWidth) {
 
 };
 
+// random calculations trying to find bass line
+// var bump = 0;
+// for (var i = 0; i < 7; i++) {
+//   bump += freq[i];
+//   bump /= 2;
+// }
+// var reduced = _.reduce(wave, function (a, b) {
+//   return (a + b) / 2;
+// });
 
+// if (bump > 180) {
+//   console.log(bump);
+// }
+
+// if (reduced > 180) {
+//   console.log("BUMP")
+//   console.log(reduced);
+//   buildRings("green", parseInt(wave[0]/ 20));
+// }
+
+// if (treble > 150) {
+//   console.log(treble);
+  
+// }
 
 var buildCircles = function (wave, freq, colorTheme) {
   
-  var bump = 0;
-  for (var i = 0; i < 7; i++) {
-    bump += freq[i];
-    bump /= 2;
-  }
-  var reduced = _.reduce(wave, function (a, b) {
-    return (a + b) / 2;
-  });
-
-  // if (bump > 180) {
-  //   console.log(bump);
-  // }
-
-  // if (reduced > 180) {
-  //   console.log("BUMP")
-  //   console.log(reduced);
-  //   buildRings("green", parseInt(wave[0]/ 20));
-  // }
-
-  // if (treble > 150) {
-  //   console.log(treble);
-    
-  // }
-
-  // Random constraints to try and match the heavy bass line
-  if (freq[0] > 235 && freq[1] > 220 && wave[0] > 150) {
-    buildRings(colorTheme, parseInt(wave[0]/20));
-  }
-
   var circles = [];
   var xInc = svgOptions.width / analyser.frequencyBinCount;
   var xPos = 0;
@@ -210,13 +206,10 @@ var buildCircles = function (wave, freq, colorTheme) {
 };
 
 
-var animateCircles = function (wave, freq, colorTheme) {
-  // Build new circles with new data set
-  var jsonCircles = buildCircles(wave, freq, colorTheme);
-
+var buildMeter = function (data) {
   // Update
   var circles = canvas.selectAll(".meter-circle")
-    .data(jsonCircles)
+    .data(data)
     .attr("cx", function (d) { return d.x; })
     .attr("cy", function (d) { return d.y; })
     .attr("r", function (d) { return d.r; })
@@ -232,6 +225,18 @@ var animateCircles = function (wave, freq, colorTheme) {
 
   // Exit
   circles.exit().remove();
+  
+};
+
+var animateCircles = function (wave, freq, colorTheme) {
+  // Build new circles for meter with new data set
+  var meterCircles = buildCircles(wave, freq, colorTheme);
+  buildMeter(meterCircles);
+
+  // Random constraints to try and match the heavy bass line
+  if (freq[0] > 235 && freq[1] > 220 && wave[0] > 150) {
+    buildRings(colorTheme, parseInt(wave[0]/20));
+  }
 };
 
 var requestID;
@@ -257,15 +262,16 @@ var stop = function () {
 };
 
 var updateTheme = function (colorTheme) {
+  console.log("switched themese from:", currentTheme, "to:", colorTheme);
   stop();
-  start(colorTheme);
+  currentTheme = colorTheme;
+  start(currentTheme);
 };
 
 var addClickListeners = function (collection) {
   _.each(collection, function (theme, i) {
     var el = document.getElementById(i);
     el.addEventListener("click", function () {
-      console.log("click");
       updateTheme(this.id);
     });
   });
@@ -282,24 +288,12 @@ var app = {
   }
 };
 
-var buildBubbles = function () {
-  
-}
-
-var el = document.getElementById("svg-canvas");
-el.addEventListener("mousemove", function (event) {
-  
-  var x = event.screenX;
-  var y = event.screenY;
-  var r = Math.random() * 100
-  var colorIndex = Math.floor(Math.random() * 4);
+var buildBubbles = function (data) {
   var opacity = Math.random() * 0.5;
-
-  var init = [];
-  init.push(new Circle (x, y, r, themes["cool"].colors[colorIndex]));
-
+ 
+  // Enter
   var bubbles = canvas.selectAll(".bubble")
-    .data(init);
+    .data(data);
     bubbles.enter().insert("circle", ":first-child")
       .attr("cx", function (d) { return d.x; })
       .attr("cy", function (d) { return d.y; })
@@ -307,6 +301,7 @@ el.addEventListener("mousemove", function (event) {
       .attr("fill", function (d) { return d.color; })
       .attr("fill-opacity", opacity);
 
+  // Update + Remove
     bubbles.transition()
     .duration(5000)
     .attr("r", 0)
@@ -314,7 +309,23 @@ el.addEventListener("mousemove", function (event) {
     .each("end", function () {
       this.remove();
     });
+};
 
+var el = document.getElementById("svg-canvas");
+el.addEventListener("mousemove", function (event) {
+  
+  var padding = Math.random() * 25;
+
+  var x = event.screenX + padding;
+  var y = event.screenY + padding;
+  var r = (getWaveFormData()[0] / 100) * 50;
+  var colorIndex = Math.floor(Math.random() * 4);
+  var color = themes[themes[currentTheme].compliment].colors[colorIndex];
+
+  var bubble = [];
+  bubble.push(new Circle (x, y, r, color));
+
+  buildBubbles(bubble);
 });
 
 // Kick it off!
