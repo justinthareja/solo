@@ -277,16 +277,6 @@ var addClickListeners = function (collection) {
   });
 };
 
-var app = {
-  init: function () {
-    // Append defined themes
-    appendThemes();
-    // Play the audio on load
-    play();
-    // Default theme
-    updateTheme("warm");
-  }
-};
 
 var buildBubbles = function (data) {
   var opacity = Math.random() * 0.5;
@@ -311,22 +301,46 @@ var buildBubbles = function (data) {
     });
 };
 
-var el = document.getElementById("svg-canvas");
-el.addEventListener("mousemove", function (event) {
-  
+document.getElementById("svg-canvas").addEventListener("mousemove", function (event) {
   var padding = Math.random() * 25;
-
   var x = event.screenX + padding;
   var y = event.screenY + padding;
   var r = (getWaveFormData()[0] / 100) * 50;
   var colorIndex = Math.floor(Math.random() * 4);
   var color = themes[themes[currentTheme].compliment].colors[colorIndex];
-
   var bubble = [];
   bubble.push(new Circle (x, y, r, color));
-
   buildBubbles(bubble);
 });
 
+document.getElementById("svg-canvas").addEventListener("click", function (event) {
+  pause();
+  var themeName = window.prompt("enter a new theme name");
+  var themeColors = window.prompt("enter 5 colors for " + themeName + " separated by commas:");
+  var themeCompliment = window.prompt("enter complementary theme. you can pick from");
+
+
+  themes[themeName] = {
+    compliment: themeCompliment,
+    colors: themeColors.split(",")
+  };
+
+  // console.log(themes)
+  appendThemes();
+  play();
+
+
+})
+
+var app = {
+  init: function () {
+    // Append defined themes
+    appendThemes();
+    // Play the audio on load
+    play();
+    // Default theme
+    updateTheme("warm");
+  }
+};
 // Kick it off!
 app.init();
